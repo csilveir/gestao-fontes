@@ -1,0 +1,16 @@
+rateio:
+  intervalo: 2
+
+cooperativas:
+  nomes:
+    - "Sicredi Pioneira RS"
+    - "Sicredi Planalto RS MG"
+    - "Sicredi Raizes RS SC MG"
+    - "Sicredi Serrana RS ES"
+    - "Sicredi Uniao Metropolitana RS"
+    - "Sicredi Vale do Jaguari e Zona da Mata RS MG"
+    - "Sicredi Vale do Rio Pardo RS"
+    - "Sicredi Uniestados"
+    - "Sicredi Sul Minas RS MG"
+
+
