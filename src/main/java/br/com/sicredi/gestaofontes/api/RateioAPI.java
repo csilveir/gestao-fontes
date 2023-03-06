@@ -28,7 +28,7 @@ public class RateioAPI {
 
     @GetMapping(path = "/rateio", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<RateioDto>> buscarRateios() {
-        return Flux.interval(Duration.of(5, ChronoUnit.SECONDS))
+        return Flux.interval(Duration.of(intervaloRateio, ChronoUnit.SECONDS))
                 .map(rateio -> ServerSentEvent.<RateioDto>builder()
                         .id(UUID.randomUUID().toString())
                         .event("rateio")
