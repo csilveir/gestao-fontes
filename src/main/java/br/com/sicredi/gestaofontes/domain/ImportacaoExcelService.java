@@ -1,9 +1,6 @@
 package br.com.sicredi.gestaofontes.domain;
 
-import br.com.sicredi.gestaofontes.dto.ArquivoRateioDto;
-import br.com.sicredi.gestaofontes.dto.PronampDto;
-import br.com.sicredi.gestaofontes.dto.RateioDemaisDto;
-import br.com.sicredi.gestaofontes.dto.RetornoImportacaoDto;
+import br.com.sicredi.gestaofontes.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -41,6 +38,10 @@ public class ImportacaoExcelService {
     private static final int COLUMN_M = 12;
 
     private static final int COLUMN_N = 13;
+
+    private static final int COLUMN_Q = 16;
+
+    private static final int COLUMN_R = 17;
 
     @Value("${excel.inicioDocumento}")
     public int inicioDocumento;
@@ -117,6 +118,10 @@ public class ImportacaoExcelService {
                         valoresDemaisRateio(cell, arquivoRateioDto);
                     } else if (cell.getColumnIndex() >= COLUMN_J && cell.getColumnIndex() <= COLUMN_N) {
                         valoresPronamp(cell, arquivoRateioDto);
+                    } else if (cell.getColumnIndex() >= COLUMN_J && cell.getColumnIndex() <= COLUMN_N) {
+                        valoresPronamp(cell, arquivoRateioDto);
+                    } else if (cell.getColumnIndex() >= COLUMN_Q && cell.getColumnIndex() <= COLUMN_R) {
+                        valoresPronaf(cell, arquivoRateioDto);
                     }
                 }
                 if (Objects.nonNull(arquivoRateioDto.getCodigoCredis()) &&
@@ -131,11 +136,11 @@ public class ImportacaoExcelService {
     }
 
     private void valoresDemaisRateio(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
-        if (Objects.isNull(arquivoRateioDto.getRateioDemaisDto())) {
-            arquivoRateioDto.setRateioDemaisDto(new RateioDemaisDto());
+        if (Objects.isNull(arquivoRateioDto.getRateioDemais())) {
+            arquivoRateioDto.setRateioDemais(new RateioDemaisDto());
         }
         if (Objects.nonNull(arquivoRateioDto.getCodigoCredis())) {
-            var rateioDemaisDto = arquivoRateioDto.getRateioDemaisDto();
+            var rateioDemaisDto = arquivoRateioDto.getRateioDemais();
 
             switch (cell.getColumnIndex()) {
                 case COLUMN_D -> rateioDemaisDto.setValorPoupancaEqual(getFormulaValueAsNumeric(cell));
@@ -147,17 +152,33 @@ public class ImportacaoExcelService {
     }
 
     private void valoresPronamp(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
-        if (Objects.isNull(arquivoRateioDto.getPronampDto())) {
-            arquivoRateioDto.setPronampDto(new PronampDto());
+        if (Objects.isNull(arquivoRateioDto.getPronamp())) {
+            arquivoRateioDto.setPronamp(new PronampDto());
         }
-        if (Objects.nonNull(arquivoRateioDto.getPronampDto())) {
-            var pronampDto = arquivoRateioDto.getPronampDto();
+        if (Objects.nonNull(arquivoRateioDto.getPronamp())) {
+            var pronampDto = arquivoRateioDto.getPronamp();
 
             switch (cell.getColumnIndex()) {
                 case COLUMN_J -> pronampDto.setValorPoupancaEqual(getFormulaValueAsNumeric(cell));
                 case COLUMN_K -> pronampDto.setValorPoupancaEqualCusteio(getFormulaValueAsNumeric(cell));
                 case COLUMN_M -> pronampDto.setValorMCRAnual(getFormulaValueAsNumeric(cell));
                 case COLUMN_N -> pronampDto.setValorMCR62(getFormulaValueAsNumeric(cell));
+
+            }
+        }
+    }
+
+    private void valoresPronaf(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
+        if (Objects.isNull(arquivoRateioDto.getPronaf())) {
+            arquivoRateioDto.setPronaf(new PronafDto());
+        }
+        if (Objects.nonNull(arquivoRateioDto.getPronaf())) {
+            var pronaf = arquivoRateioDto.getPronaf();
+
+            switch (cell.getColumnIndex()) {
+                case COLUMN_Q -> pronaf.setValorPoupancaEqual(getFormulaValueAsNumeric(cell));
+                case COLUMN_R -> pronaf.setValorMCR62(getFormulaValueAsNumeric(cell));
+
 
             }
         }

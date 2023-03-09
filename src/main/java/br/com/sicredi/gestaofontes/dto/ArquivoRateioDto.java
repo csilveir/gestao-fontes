@@ -14,7 +14,9 @@ public class ArquivoRateioDto {
     private BigDecimal codigoCredis;
     private String nomeCooperativa;
 
-    private RateioDemaisDto rateioDemaisDto;
+    private RateioDemaisDto rateioDemais;
 
-    private PronampDto pronampDto;
+    private PronampDto pronamp;
+
+    private PronafDto pronaf;
 }
