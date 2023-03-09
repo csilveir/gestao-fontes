@@ -14,3 +14,8 @@ cooperativas:
     - "Sicredi Sul Minas RS MG"
 
 
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB

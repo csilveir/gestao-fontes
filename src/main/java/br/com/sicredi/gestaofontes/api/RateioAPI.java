@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
@@ -14,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("rateio")
 public class RateioAPI {
 
 
@@ -26,7 +28,7 @@ public class RateioAPI {
 
     private final RateioRepository rateioRepository;
 
-    @GetMapping(path = "/rateio", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<RateioDto>> buscarRateios() {
         return Flux.interval(Duration.of(intervaloRateio, ChronoUnit.SECONDS))
                 .map(rateio -> ServerSentEvent.<RateioDto>builder()
