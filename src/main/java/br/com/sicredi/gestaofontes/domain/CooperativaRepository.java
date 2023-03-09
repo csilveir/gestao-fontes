@@ -14,8 +14,8 @@ import java.util.Random;
 @Getter
 public class CooperativaRepository {
 
-    private List<String> nomes = new ArrayList<>();
-    private Random random = new Random();
+    private final List<String> nomes = new ArrayList<>();
+    private final Random random = new Random();
 
     public String getNomeCooperativa() {
 
