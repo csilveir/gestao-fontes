@@ -1,6 +1,8 @@
 package br.com.sicredi.gestaofontes.domain;
 
 import br.com.sicredi.gestaofontes.dto.ArquivoRateioDto;
+import br.com.sicredi.gestaofontes.dto.PronampDto;
+import br.com.sicredi.gestaofontes.dto.RateioDemaisDto;
 import br.com.sicredi.gestaofontes.dto.RetornoImportacaoDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +31,17 @@ public class ImportacaoExcelService {
 
 
     public static final int COLUMN_A = 0;
+    private static final int COLUMN_C = 2;
+    private static final int COLUMN_D = 3;
+    private static final int COLUMN_E = 4;
+    private static final int COLUMN_H = 6;
+    private static final int COLUMN_F = 5;
+    private static final int COLUMN_J = 9;
+    private static final int COLUMN_K = 10;
+    private static final int COLUMN_M = 12;
+
+    private static final int COLUMN_N = 13;
+
     @Value("${excel.inicioDocumento}")
     public int inicioDocumento;
     @Value("${excel.abaGop}")
@@ -97,9 +111,17 @@ public class ImportacaoExcelService {
                 for (Cell cell : row) {
                     if (cell.getColumnIndex() == COLUMN_A) {
                         arquivoRateioDto.setCodigoCredis(getNumericValue(cell));
+                    } else if (cell.getColumnIndex() == COLUMN_C) {
+                        arquivoRateioDto.setNomeCooperativa(getStringValue(cell));
+                    } else if (cell.getColumnIndex() >= COLUMN_D && cell.getColumnIndex() <= COLUMN_H) {
+                        valoresDemaisRateio(cell, arquivoRateioDto);
+                    } else if (cell.getColumnIndex() >= COLUMN_J && cell.getColumnIndex() <= COLUMN_N) {
+                        valoresPronamp(cell, arquivoRateioDto);
                     }
                 }
-                rateioDtoArrayList.add(arquivoRateioDto);
+                if (Objects.nonNull(arquivoRateioDto.getCodigoCredis()) &&
+                        arquivoRateioDto.getCodigoCredis().compareTo(BigDecimal.ZERO) > 0)
+                    rateioDtoArrayList.add(arquivoRateioDto);
             }
         }
 
@@ -108,13 +130,73 @@ public class ImportacaoExcelService {
 
     }
 
-    private double getNumericValue(final Cell cell) {
+    private void valoresDemaisRateio(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
+        if (Objects.isNull(arquivoRateioDto.getRateioDemaisDto())) {
+            arquivoRateioDto.setRateioDemaisDto(new RateioDemaisDto());
+        }
+        if (Objects.nonNull(arquivoRateioDto.getCodigoCredis())) {
+            var rateioDemaisDto = arquivoRateioDto.getRateioDemaisDto();
+
+            switch (cell.getColumnIndex()) {
+                case COLUMN_D -> rateioDemaisDto.setValorPoupancaEqual(getFormulaValueAsNumeric(cell));
+                case COLUMN_E -> rateioDemaisDto.setValorMCR2CatAnual(getFormulaValueAsNumeric(cell));
+                case COLUMN_F -> rateioDemaisDto.setValorLCA(getFormulaValueAsNumeric(cell));
+                case COLUMN_H -> rateioDemaisDto.setValorOutrasFontes(getFormulaValueAsNumeric(cell));
+            }
+        }
+    }
+
+    private void valoresPronamp(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
+        if (Objects.isNull(arquivoRateioDto.getPronampDto())) {
+            arquivoRateioDto.setPronampDto(new PronampDto());
+        }
+        if (Objects.nonNull(arquivoRateioDto.getPronampDto())) {
+            var pronampDto = arquivoRateioDto.getPronampDto();
+
+            switch (cell.getColumnIndex()) {
+                case COLUMN_J -> pronampDto.setValorPoupancaEqual(getFormulaValueAsNumeric(cell));
+                case COLUMN_K -> pronampDto.setValorPoupancaEqualCusteio(getFormulaValueAsNumeric(cell));
+                case COLUMN_M -> pronampDto.setValorMCRAnual(getFormulaValueAsNumeric(cell));
+                case COLUMN_N -> pronampDto.setValorMCR62(getFormulaValueAsNumeric(cell));
+
+            }
+        }
+    }
+
+    private BigDecimal getNumericValue(final Cell cell) {
 
         if (cell.getCellType().equals(CellType.NUMERIC)) {
-            return cell.getNumericCellValue();
+            try {
+                return BigDecimal.valueOf(cell.getNumericCellValue());
+            } catch (IllegalStateException e) {
+                log.error(e.getMessage());
+            }
+
         }
 
-        return 0d;
+        return BigDecimal.ZERO;
+    }
+
+    private BigDecimal getFormulaValueAsNumeric(final Cell cell) {
+
+        if (cell.getCellType().equals(CellType.FORMULA)) {
+            try {
+                return BigDecimal.valueOf(cell.getNumericCellValue());
+            } catch (IllegalStateException e) {
+                log.error(e.getMessage());
+            }
+        }
+
+        return BigDecimal.ZERO;
+    }
+
+    private String getStringValue(final Cell cell) {
+
+        if (cell.getCellType().equals(CellType.STRING)) {
+            return cell.getStringCellValue();
+        }
+
+        return null;
     }
 
 }
