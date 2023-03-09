@@ -1,6 +1,11 @@
 rateio:
   intervalo: 2
 
+excel:
+  abaGop: 6
+  extensao: xlsm
+  inicioDocumento: 4
+
 cooperativas:
   nomes:
     - "Sicredi Pioneira RS"
