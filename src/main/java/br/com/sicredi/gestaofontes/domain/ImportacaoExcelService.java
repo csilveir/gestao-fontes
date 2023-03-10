@@ -93,12 +93,21 @@ public class ImportacaoExcelService {
 
     public Mono<List<ArquivoRateioDto>> carregarArquivo(final File excelFile) {
 
-        log.info("Carregando o arquivo " + excelFile);
+        log.info("Carregando o arquivo", excelFile);
         try (var wb = new XSSFWorkbook(excelFile)) {
             return Mono.just(carregarDados(wb.getSheetAt(baseGop)));
         } catch (IOException | InvalidFormatException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
+        } finally {
+            try {
+                log.info("Removendo o arquivo ", excelFile);
+                Files.deleteIfExists(excelFile.toPath());
+            } catch (IOException e) {
+
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
         }
 
 
@@ -137,7 +146,7 @@ public class ImportacaoExcelService {
 
     }
 
-    private void valoresDemaisRateio(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
+    private void valoresDemaisRateio(final Cell cell, final ArquivoRateioDto arquivoRateioDto) {
         if (Objects.isNull(arquivoRateioDto.getRateioDemais())) {
             arquivoRateioDto.setRateioDemais(new RateioDemaisDto());
         }
@@ -153,7 +162,7 @@ public class ImportacaoExcelService {
         }
     }
 
-    private void valoresPronamp(final Cell cell, ArquivoRateioDto arquivoRateioDto) {
+    private void valoresPronamp(final Cell cell, final ArquivoRateioDto arquivoRateioDto) {
         if (Objects.isNull(arquivoRateioDto.getPronamp())) {
             arquivoRateioDto.setPronamp(new PronampDto());
         }

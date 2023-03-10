@@ -5,6 +5,7 @@ import br.com.sicredi.gestaofontes.domain.ImportacaoExcelService;
 import br.com.sicredi.gestaofontes.dto.ArquivoRateioDto;
 import br.com.sicredi.gestaofontes.dto.RetornoImportacaoDto;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ public class ImportacaoExcelAPI {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public Mono<List<ArquivoRateioDto>> getFile(@PathVariable final String id) {
         var optionalFile = importacaoExcelService.encontrarArquivo(id);
         if (optionalFile.isPresent()) {
