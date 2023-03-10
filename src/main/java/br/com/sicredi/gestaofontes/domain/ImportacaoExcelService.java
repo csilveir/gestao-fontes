@@ -22,10 +22,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.nio.file.Files.createDirectory;
+
 @Service
 @Slf4j
 public class ImportacaoExcelService {
-
 
     public static final int COLUMN_A = 0;
     private static final int COLUMN_C = 2;
@@ -58,9 +59,11 @@ public class ImportacaoExcelService {
         var newDirectory = basePath.resolve(id);
 
         try {
-            var directory = Files.createDirectory(newDirectory);
+            var directory = createDirectory(newDirectory);
             return filePartMono
-                    .doOnNext(fp -> log.info("Received File : " + fp.filename()))
+                    .doOnNext(fp -> {
+                        log.info("Received File : " + fp.filename());
+                    })
                     .flatMap(fp -> fp.transferTo(directory.resolve(fp.filename())))
                     .then(Mono.just(new RetornoImportacaoDto(id)));
         } catch (IOException e) {
@@ -89,13 +92,12 @@ public class ImportacaoExcelService {
     }
 
     public Mono<List<ArquivoRateioDto>> carregarArquivo(final File excelFile) {
-        try {
-            log.info("Carregando o arquivo " + excelFile);
-            var wb = new XSSFWorkbook(excelFile);
-            return Mono.just(carregarDados(wb.getSheetAt(baseGop)));
 
-        } catch (InvalidFormatException | IOException e) {
-            log.error(e.getMessage());
+        log.info("Carregando o arquivo " + excelFile);
+        try (var wb = new XSSFWorkbook(excelFile)) {
+            return Mono.just(carregarDados(wb.getSheetAt(baseGop)));
+        } catch (IOException | InvalidFormatException e) {
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
 
@@ -190,7 +192,7 @@ public class ImportacaoExcelService {
             try {
                 return BigDecimal.valueOf(cell.getNumericCellValue());
             } catch (IllegalStateException e) {
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
             }
 
         }
@@ -204,7 +206,7 @@ public class ImportacaoExcelService {
             try {
                 return BigDecimal.valueOf(cell.getNumericCellValue());
             } catch (IllegalStateException e) {
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
             }
         }
 
